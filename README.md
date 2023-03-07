@@ -2,7 +2,7 @@
 
 Learning Node, Express &amp; MongoDB.
 
-I'm working at BAE as software engineer but none of my work there is accessible publically on GitHub so I have created this project to show off my backend skills.
+I'm working at BAE as software engineer but none of my work there is accessible publically on GitHub so I have created this project to show off my backend skills. 🎉🥳
 
 I graduated from the [School of Code](https://www.schoolofcode.co.uk/) in 2022.
 
