@@ -1,17 +1,35 @@
 const fs = require('fs');
 const express = require('express');
+const morgan = require('morgan');
 
 const app = express();
+
+/**** 1) Middleware ****/
+// morgan also calls (req, res, next) callback func >>> https://github.com/expressjs/morgan/blob/master/index.js
+app.use(morgan('dev'));
 
 // express.json() is middleware that adds data from body to request obj
 app.use(express.json());
 
+app.use((req, res, next) => {
+  console.log('Hello from the middleware 🤯');
+  next();
+});
+
+app.use((req, res, next) => {
+  req.requestTime = new Date().toISOString();
+  next();
+});
+
 const tours = fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`);
 const toursObj = JSON.parse(tours);
+
+/**** 2) Route Handlers ****/
 
 const getAllTours = (req, res) => {
   res.status(200).json({
     status: 'success',
+    reqestedAt: req.requestTime,
     results: toursObj.length,
     data: {
       tours: toursObj,
@@ -94,6 +112,8 @@ const deleteTour = (req, res) => {
 // app.patch('/api/v1/tours/:id', updateTour);
 // app.delete('/api/v1/tours/:id', deleteTour);
 
+/**** 3) Routes ****/
+
 app.route('/api/v1/tours').get(getAllTours).post(createTour);
 
 app
@@ -101,6 +121,8 @@ app
   .get(getTour)
   .patch(updateTour)
   .delete(deleteTour);
+
+/**** 4) Server ****/
 
 const port = 3000;
 app.listen(port, () => {
