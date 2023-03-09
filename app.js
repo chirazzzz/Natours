@@ -23,13 +23,15 @@ app.use((req, res, next) => {
 
 const tours = fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`);
 const toursObj = JSON.parse(tours);
+const users = fs.readFileSync(`${__dirname}/dev-data/data/users.json`);
+const usersObj = JSON.parse(users);
 
 /**** 2) Route Handlers ****/
 
 const getAllTours = (req, res) => {
   res.status(200).json({
     status: 'success',
-    reqestedAt: req.requestTime,
+    requestedAt: req.requestTime,
     results: toursObj.length,
     data: {
       tours: toursObj,
@@ -106,11 +108,41 @@ const deleteTour = (req, res) => {
   });
 };
 
-// app.get('/api/v1/tours', getAllTours);
-// app.get('/api/v1/tours/:id', getTour);
-// app.post('/api/v1/tours', createTour);
-// app.patch('/api/v1/tours/:id', updateTour);
-// app.delete('/api/v1/tours/:id', deleteTour);
+const getAllUsers = (req, res) => {
+  res.status(200).json({
+    status: 'success',
+    requestedAt: req.requestTime,
+    results: usersObj.length,
+    data: {
+      tours: usersObj,
+    },
+  });
+};
+
+const createUser = (req, res) => {
+  res.status(500).json({
+    status: 'error',
+    message: 'This route is not defined yet'
+  })
+};
+const getUser = (req, res) => {
+  res.status(500).json({
+    status: 'error',
+    message: 'This route is not defined yet'
+  })
+};
+const updateUser = (req, res) => {
+  res.status(500).json({
+    status: 'error',
+    message: 'This route is not defined yet'
+  })
+};
+const deleteUser = (req, res) => {
+  res.status(500).json({
+    status: 'error',
+    message: 'This route is not defined yet'
+  })
+};
 
 /**** 3) Routes ****/
 
@@ -121,6 +153,15 @@ app
   .get(getTour)
   .patch(updateTour)
   .delete(deleteTour);
+  
+  app.route('/api/v1/users').get(getAllUsers).post(createUser);
+  
+app
+  .route('/api/v1/users/:id')
+  .get(getUser)
+  .patch(updateUser)
+  .delete(deleteUser);
+
 
 /**** 4) Server ****/
 
