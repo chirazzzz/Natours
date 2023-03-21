@@ -7,7 +7,7 @@ const {getAllTours, createTour, getTour, updateTour, deleteTour} = tourControlle
 const router = express.Router();
 
 // Param middleware that only runs for 'id' param
-router.param('id', tourController.checkID);
+// router.param('id', tourController.checkID);
 
 router
   .route('/')

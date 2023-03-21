@@ -1,10 +1,13 @@
 const fs = require('fs');
+const Tour = require('./../models/tourModel')
 
+/*** imported data from json file not needed now we've hooked upto Mongo Atlas
 const tours = fs.readFileSync(
   `${__dirname}/../dev-data/data/tours-simple.json`
 );
-const toursObj = JSON.parse(tours);
+const toursObj = JSON.parse(tours); 
 
+// checkID is a middleware example that shows how middleware works
 exports.checkID = (req, res, next, val) => {
   console.log(`Tour id is: ${val}`);
   
@@ -16,7 +19,7 @@ exports.checkID = (req, res, next, val) => {
     });
   }
   next();
-};
+}; ***/
 
 exports.checkBody = (req, res, next) => {
   if(!req.body.name || !req.body.price) {
@@ -32,43 +35,33 @@ exports.getAllTours = (req, res) => {
   res.status(200).json({
     status: 'success',
     requestedAt: req.requestTime,
-    results: toursObj.length,
-    data: {
-      tours: toursObj,
-    },
+    // results: toursObj.length,
+    // data: {
+    //   tours: toursObj,
+    // },
   });
 };
 
 exports.getTour = (req, res) => {
   console.log(req.params);
   const idNumber = parseInt(req.params.id);
-  const tour = toursObj.find((el) => el.id === idNumber);
+  // const tour = toursObj.find((el) => el.id === idNumber);
 
-  res.status(200).json({
-    status: 'success',
-    data: {
-      tour,
-    },
-  });
+  // res.status(200).json({
+  //   status: 'success',
+  //   data: {
+  //     tour,
+  //   },
+  // });
 };
 
 exports.createTour = (req, res) => {
-  const newId = toursObj[toursObj.length - 1].id + 1;
-  const newTour = { id: newId, ...req.body };
-  toursObj.push(newTour);
-  fs.writeFile(
-    `${__dirname}/dev-data/data/tours-simple.json`,
-    JSON.stringify(toursObj),
-    (err) => {
-      res.status(201).json({
-        status: 'success',
-        data: {
-          toursObj: newTour,
-        },
-      });
-      console.log('New tour saved');
-    }
-  );
+  res.status(201).json({
+    status: 'success',
+    // data: {
+    //   toursObj: newTour,
+    // },
+  });
 };
 
 exports.updateTour = (req, res) => {
