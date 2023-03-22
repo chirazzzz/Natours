@@ -1,5 +1,5 @@
 const fs = require('fs');
-const Tour = require('./../models/tourModel')
+const Tour = require('./../models/tourModel');
 
 /*** imported data from json file not needed now we've hooked upto Mongo Atlas
 const tours = fs.readFileSync(
@@ -20,16 +20,6 @@ exports.checkID = (req, res, next, val) => {
   }
   next();
 }; ***/
-
-exports.checkBody = (req, res, next) => {
-  if(!req.body.name || !req.body.price) {
-    return res.status(400).json({
-      status: 'fail',
-      message: 'Name or Price not submitted',
-    })
-  }
-  next();
-};
 
 exports.getAllTours = (req, res) => {
   res.status(200).json({
@@ -55,13 +45,24 @@ exports.getTour = (req, res) => {
   // });
 };
 
-exports.createTour = (req, res) => {
-  res.status(201).json({
-    status: 'success',
-    // data: {
-    //   toursObj: newTour,
-    // },
-  });
+exports.createTour = async (req, res) => {
+  try {
+    // const newTour = new Tour({})
+    // newTour.save()
+    const newTour = await Tour.create(req.body);
+
+    res.status(201).json({
+      status: 'success',
+      data: {
+        toursObj: newTour,
+      },
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: 'Invalid data sent',
+    });
+  }
 };
 
 exports.updateTour = (req, res) => {
