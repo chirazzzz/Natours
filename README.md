@@ -23,6 +23,8 @@ I graduated from the [School of Code](https://www.schoolofcode.co.uk/) in 2022.
 
 Since this app is made with Node, Express and MongoDB you'll need to run ```npm i``` after you've cloned or forked the repo onto your local machine.
 
+Script to populate your Mongo dev database is ```node dev-data/data/import-dev-data.js --import```. to delete data it's ```node dev-data/data/import-dev-data.js --delete```
+
 ## Description
 
 ## Challenges
