@@ -5,8 +5,6 @@ const userRouter = require('./routes/userRoutes');
 
 const app = express();
 
-// outputs if we're in development or production
-console.log(process.env.NODE_ENV);
 /**** 1) Middleware - for all routes ****/
 // morgan also calls (req, res, next) callback func >>> https://github.com/expressjs/morgan/blob/master/index.js
 if (process.env.NODE_ENV === 'development') {

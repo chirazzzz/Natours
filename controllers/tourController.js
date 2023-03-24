@@ -23,13 +23,29 @@ exports.checkID = (req, res, next, val) => {
 
 exports.getAllTours = async (req, res) => {
   try {
-    const allTours = await Tour.find();
+    // Build  QUERY
+    const queryObj = { ...req.query }; // { ...req.query } creates copy of req.query in new obj
+    const excludedFields = ['page', 'sort', 'limit', 'fields'];
+    // used forEach coz we want to alter queryObj and remove excludedFields
+    excludedFields.forEach((el) => delete queryObj[el]);
 
+    const query = await Tour.find(queryObj);
+
+    /** Filtering using special Mongoose methods 
+    const query = await Tour.find()
+      .where('duration')
+      .lt(10)
+      .where('difficulty')
+      .equals('medium'); **/
+    // Execute QUERY
+      const Tours = await query;
+
+    // send RESPONSE
     res.status(200).json({
       status: 'success',
-      results: allTours.length,
+      results: tours.length,
       data: {
-        tours: allTours,
+        tours: tours,
       },
     });
   } catch (err) {
@@ -101,13 +117,13 @@ exports.updateTour = async (req, res) => {
 
 exports.deleteTour = async (req, res) => {
   try {
-    await Tour.findByIdAndDelete(req.params.id)
-    
+    await Tour.findByIdAndDelete(req.params.id);
+
     res.status(204).json({
       status: 'success',
       data: null,
     });
-  } catch(err) {
+  } catch (err) {
     res.status(400).json({
       status: 'fail',
       message: 'Invalid data sent',
