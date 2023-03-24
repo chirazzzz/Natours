@@ -23,13 +23,24 @@ exports.checkID = (req, res, next, val) => {
 
 exports.getAllTours = async (req, res) => {
   try {
+    console.log(req.query);
     // Build  QUERY
+    // 1) Filtering
     const queryObj = { ...req.query }; // { ...req.query } creates copy of req.query in new obj
     const excludedFields = ['page', 'sort', 'limit', 'fields'];
     // used forEach coz we want to alter queryObj and remove excludedFields
     excludedFields.forEach((el) => delete queryObj[el]);
 
-    const query = await Tour.find(queryObj);
+    // 2) Advanced Filtering
+    let queryStr = JSON.stringify(queryObj);
+    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+    console.log(JSON.parse(queryStr));
+    // {difficulty: 'easy', duration: { $gte: 5} }
+    // { duration: { gte: '5' }, difficulty: 'easy' }
+    const query = Tour.find(JSON.parse(queryStr));
+
+    // Execute QUERY
+    const tours = await query;
 
     /** Filtering using special Mongoose methods 
     const query = await Tour.find()
@@ -37,8 +48,6 @@ exports.getAllTours = async (req, res) => {
       .lt(10)
       .where('difficulty')
       .equals('medium'); **/
-    // Execute QUERY
-      const Tours = await query;
 
     // send RESPONSE
     res.status(200).json({
