@@ -42,26 +42,30 @@ exports.getAllTours = async (req, res) => {
       const sortBy = req.query.sort.split(',').join(' ');
       query = query.sort(sortBy);
     } else {
-      query = query.sort('-createdAt');
+      query = query.sort('price');
     }
 
     // 3) Field Limiting
     if (req.query.fields) {
       const fields = req.query.fields.split(',').join(' ');
-      query = query.select(fields)
+      query = query.select(fields);
     } else {
-      query = query.select('-__v')
+      query = query.select('-__v');
     }
 
+    // 4) Pagination
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 100;
+    const skipValue = (page - 1) * limit;
+
+    query = query.skip(skipValue).limit(limit);
+
+    if (req.query.page) {
+      const numTours = await Tour.countDocuments();
+      if (skipValue >= numTours) throw new Error('This page does not exist');
+    }
     // Execute QUERY
     const tours = await query;
-
-    /** Filtering using special Mongoose methods 
-    const query = await Tour.find()
-      .where('duration')
-      .lt(10)
-      .where('difficulty')
-      .equals('medium'); **/
 
     // send RESPONSE
     res.status(200).json({
