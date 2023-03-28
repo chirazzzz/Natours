@@ -1,5 +1,5 @@
 const Tour = require('./../models/tourModel');
-const APIFeatures = require('./../utils/apiFeatures')
+const APIFeatures = require('./../utils/apiFeatures');
 
 /*** imported data from json file not needed now we've hooked upto Mongo Atlas
 const tours = fs.readFileSync(
@@ -128,6 +128,46 @@ exports.deleteTour = async (req, res) => {
     res.status(204).json({
       status: 'success',
       data: null,
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: 'Invalid data sent',
+    });
+  }
+};
+
+exports.getTourStats = async (req, res) => {
+  try {
+    const stats = await Tour.aggregate([
+      {
+        $match: { ratingsAverage: { $gte: 4.5 } },
+      },
+      {
+        $group: {
+          // _id: null, // null let's us group all tours
+          _id: { $toUpper: '$difficulty' },
+          numTours: { $sum: 1 }, // add 1 for each document that goes through pipeline
+          numRating: { $sum: '$ratingsQuantity' },
+          avgRating: { $avg: '$ratingsAverage' },
+          avgPrice: { $avg: '$price' },
+          minPrice: { $min: '$price' },
+          maxPrice: { $max: '$price' },
+        },
+      },
+      {
+        $sort: { numTours: 1 }, // have to use fields names in above group - sorted by numTours 1 is ascending
+      },
+      // {
+      //   $match: { _id: { $ne: 'EASY' } }, // further match using ne (not equals) excludes 'EASY' from results
+      // },
+    ]);
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        stats,
+      },
     });
   } catch (err) {
     res.status(400).json({
