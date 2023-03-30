@@ -1,13 +1,16 @@
 const mongoose = require('mongoose');
+const slugify = require('slugify');
 
 const tourSchema = new mongoose.Schema(
-  { // schema definition
+  {
+    // schema definition
     name: {
       type: String,
       required: [true, 'A tour must have a name'],
       unique: true,
       trim: true, // trim only works on Strings and it removes any whitespace at start/end of string
     },
+    slug: String,
     duration: {
       type: Number,
       required: [true, 'A tour must have a duration'],
@@ -54,7 +57,8 @@ const tourSchema = new mongoose.Schema(
     },
     startDates: [Date], // this means an Array of type: Date
   },
-  { // schema options
+  {
+    // schema options
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   }
@@ -65,6 +69,22 @@ const tourSchema = new mongoose.Schema(
 tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7; // used regular func coz we need to use 'this' keyword to point ot current document
 });
+
+// DOCUMENT MIDDLEWARE: only runs before .save() & .create()
+tourSchema.pre('save', function (next) {
+  this.slug = slugify(this.name, { lower: true });
+  next();
+});
+
+// tourSchema.pre('save', function (next) {
+//   console.log('Will save document...');
+//   next();
+// });
+
+// tourSchema.post('save', function (doc, next) {
+//   console.log(doc);
+//   next();
+// });
 
 const Tour = mongoose.model('Tour', tourSchema);
 
