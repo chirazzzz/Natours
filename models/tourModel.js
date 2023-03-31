@@ -71,7 +71,7 @@ const tourSchema = new mongoose.Schema(
 // virtual property durationWeeks is created each time we use .get
 // cannot be used in query because it's not part of DB - just amending the response to client
 tourSchema.virtual('durationWeeks').get(function () {
-  return this.duration / 7; // used regular func coz we need to use 'this' keyword to point ot current document
+  return this.duration / 7; // used regular func coz we need to use 'this' keyword to point to current document
 });
 
 // DOCUMENT MIDDLEWARE: only runs before .save() & .create()
@@ -91,19 +91,29 @@ tourSchema.pre('save', function (next) {
 // });
 
 // QUERY MIDDLEWARE: only runs when querying DB
-// tourSchema.pre('find', function (next) {
+// tourSchema.pre('find', function (next) { <<== this only selects .find query (https://mongoosejs.com/docs/api/query.html#Query.prototype.find() )
 tourSchema.pre(/^find/, function (next) {
-  this.find({ secretTour: { $ne: true } });
+  // ^find is RegEx that selects any query beginning with find so also incs findOne, findOneAndDelete etc
+  this.find({ secretTour: { $ne: true } }); // 'this' refers to the current query and we filter out secretTour not equal to true
 
-  this.start = Date.now()
+  this.start = Date.now(); // adds start key into query obj which has current Time - Date.Now()
   next();
 });
 
 tourSchema.post(/^find/, function (docs, next) {
-  console.log(`Query took ${Date.now() - this.start} milliseconds`);
-  console.log(docs);
-  next()
-})
+  console.log(`Query took ${Date.now() - this.start} milliseconds`); // calc time taken Date.now() - this.start from pre middleware above
+  next();
+});
+
+// AGGREGATION MIDDLEWARE
+tourSchema.pre('aggregate', function (next) {
+// to filter out secretTour we need to another $match to aggregation pipeline
+  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } }); // 'this' refers to aggregation pipeline we unshift $match to beginning of aggregate array
+
+  console.log(this.pipeline());
+
+  next();
+});
 
 const Tour = mongoose.model('Tour', tourSchema);
 
