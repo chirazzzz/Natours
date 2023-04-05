@@ -29,9 +29,25 @@ app.use('/api/v1/users', userRouter);
 
 // app.all('*') handles any random routes
 app.all('*', (req, res, next) => {
-  res.status(404).json({
-    status: 'fail',
-    message: `Can't find ${req.originalUrl} on our server`,
+  // res.status(404).json({
+  //   status: 'fail',
+  //   message: `Can't find ${req.originalUrl} on our server`,
+  // });
+
+  const err = new Error(`Can't find ${req.originalUrl} on our server`);
+  err.status = 'fail';
+  err.statusCode = 404;
+
+  next(err); // whenever you pass arg into next() Express assumes that is an error
+});
+
+app.use((err, req, res, next) => {
+  err.statusCode = err.statusCode || 500;
+  err.status = err.status || 'error';
+
+  res.status(err.statusCode).json({
+    status: err.status,
+    message: err.message,
   });
 });
 
