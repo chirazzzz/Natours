@@ -26,16 +26,17 @@ const tourSchema = new mongoose.Schema(
     difficulty: {
       type: String,
       required: [true, 'A tour must have a difficulty'],
-      enum: { // enum can only be used with strings
+      enum: {
+        // enum can only be used with strings
         values: ['easy', 'medium', 'difficult'], // specify the only acceptable options
-        message: 'Difficulty is either: easy, medium or difficult'
-      }
+        message: 'Difficulty is either: easy, medium or difficult',
+      },
     },
     ratingsAverage: {
       type: Number,
       default: 4.5,
       min: [1, 'Rating must be above 1.0'], // min/max work with numbers and date
-      max: [5, 'Rating must be below 5.0']
+      max: [5, 'Rating must be below 5.0'],
     },
     ratingsQuantity: {
       type: Number,
@@ -51,10 +52,11 @@ const tourSchema = new mongoose.Schema(
         validator: function (val) {
           // this only points to current doc when creating NEW document
           return val < this.price; // priceDiscount (100) < price (397) => true
-                                  // priceDiscount (400) < price (397) => false and trigger validation error
+          // priceDiscount (400) < price (397) => false and trigger validation error
         },
-        message: 'Price discount ({VALUE}) should be smaller than regular price'
-      }
+        message:
+          'Price discount ({VALUE}) should be smaller than regular price',
+      },
     },
     summary: {
       type: String,
@@ -127,7 +129,7 @@ tourSchema.post(/^find/, function (docs, next) {
 
 // AGGREGATION MIDDLEWARE
 tourSchema.pre('aggregate', function (next) {
-// to filter out secretTour we need to another $match to aggregation pipeline
+  // to filter out secretTour we need to another $match to aggregation pipeline
   this.pipeline().unshift({ $match: { secretTour: { $ne: true } } }); // 'this' refers to aggregation pipeline we unshift $match to beginning of aggregate array
 
   console.log(this.pipeline());

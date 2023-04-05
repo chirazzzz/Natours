@@ -6,6 +6,7 @@
   "scripts": {
     "start": "cross-env nodemon server.js",
     "build": "cross-env NODE_ENV=production nodemon server.js",
+    "debug": "ndb server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Chirag Mehta",
