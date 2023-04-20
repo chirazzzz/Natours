@@ -1,9 +1,6 @@
 class AppError extends Error {
   constructor(message, statusCode) {
-    super(
-      message
-    ); /* when extending parent class we call super() to call parent constructor
-                       passing message as arg because Error only accepts message parameter */
+    super(message); // when extending parent class we call super() to call parent constructor passing message as arg because Error only accepts message parameter
 
     this.statusCode = statusCode;
     // any 400, 401, 404 etc statusCodes are fails. Anything else is an error
