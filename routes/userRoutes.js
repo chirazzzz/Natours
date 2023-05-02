@@ -3,8 +3,9 @@ const userController = require('../controllers/userController');
 const authController = require('../controllers/authController');
 
 const router = express.Router();
-// /signup is a one-off, special route that doesn't fit into REST pattern. We only use POST
+// /signup && /login are one-off, special routes that don't fit into REST pattern. We only use POST
 router.post('/signup', authController.signup);
+router.post('/login', authController.login);
 
 router
   .route('/')

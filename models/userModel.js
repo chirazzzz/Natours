@@ -21,6 +21,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please provide a password!'],
     minlength: 8,
+    select: false,
   },
   passwordConfirm: {
     type: String,
@@ -47,6 +48,12 @@ userSchema.pre('save', async function (next) {
   this.passwordConfirm = undefined;
   next();
 });
+
+// This is an instance method which is available on all documents of a certain collection
+userSchema.methods.correctPassword = async function (inputPassword, savedPassword) {
+  // returns true if input matches saved password and false if not
+  return await bcrypt.compare(inputPassword, savedPassword);
+};
 
 const User = mongoose.model('User', userSchema);
 
