@@ -1,5 +1,6 @@
 const express = require('express');
-const tourController = require('../controllers/tourController');
+const tourController = require('./../controllers/tourController');
+const authController = require('./../controllers/authController');
 
 /* Could destructure tourController to save functions 
 const {getAllTours, createTour, getTour, updateTour, deleteTour} = tourController */
@@ -22,7 +23,7 @@ router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan);
 
 router
   .route('/')
-  .get(tourController.getAllTours)
+  .get(authController.protect, tourController.getAllTours)
   .post(tourController.createTour);
 
 router
