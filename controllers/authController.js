@@ -99,6 +99,23 @@ exports.protect = catchAsync(async (req, res, next) => {
     );
   }
   // GRANTS ACCESS TO PROTECTED ROUTE
-  req.user = currentUser
+  req.user = currentUser;
   next();
 });
+
+/* restrictTo requires params of user roles however this isn't normally accessible to middleware
+  So we wrap middleware func within restrictTo and pass ['admin', 'lead-guide'] roles as args */
+exports.restrictTo = (...roles) => {
+  return (req, res, next) => {
+    // roles = ['admin', 'lead-guide']. If role = 'user' they don't have permission
+    if (!roles.includes(req.user.role)) { // if role = 'user' then return AppError
+      // req.user.role is saved at the end of protect func above
+      return next(
+        new AppError('You do not have permission to perform this action', 403)
+      );
+    }
+
+    // if role isn't included then next()
+    next();
+  };
+};
