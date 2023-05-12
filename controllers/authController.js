@@ -50,6 +50,7 @@ exports.login = catchAsync(async (req, res, next) => {
     Therefore had to place logic directly inside the if conditional which will only run if user exists
   const correct = await user.correctPassword(password, user.password) */
 
+  // user.correctPassword is instance method
   if (!user || !(await user.correctPassword(password, user.password))) {
     return next(new AppError('Incorrect email or password!', 401));
   }
@@ -93,6 +94,8 @@ exports.protect = catchAsync(async (req, res, next) => {
   }
 
   // 4) check if user changed password after the token was issued
+
+  // currentUser.changedPasswordAfter is an instance method
   if (currentUser.changedPasswordAfter(decoded.iat)) {
     return next(
       new AppError('User recently changed password! Please log in again', 401)
@@ -108,7 +111,8 @@ exports.protect = catchAsync(async (req, res, next) => {
 exports.restrictTo = (...roles) => {
   return (req, res, next) => {
     // roles = ['admin', 'lead-guide']. If role = 'user' they don't have permission
-    if (!roles.includes(req.user.role)) { // if role = 'user' then return AppError
+    if (!roles.includes(req.user.role)) {
+      // if role = 'user' then return AppError
       // req.user.role is saved at the end of protect func above
       return next(
         new AppError('You do not have permission to perform this action', 403)
@@ -119,3 +123,23 @@ exports.restrictTo = (...roles) => {
     next();
   };
 };
+
+exports.forgotPassword = catchAsync(async (req, res, next) => {
+  // 1) Get user based on POSTed email
+  const user = await User.findOne({ email: req.body.email });
+  if (!user) {
+    return next(new AppError('There is no user with that email address', 404));
+  }
+
+  // 2) Generate the random token
+
+  // user.createPasswordResetToken() is an instance method
+  const resetToken = user.createPasswordResetToken();
+  /* this.passwordResetToken && this.passwordResetExpires in createPasswordResetToken 
+    however it isn't saved to DB so it happens below*/
+  await user.save({ validateBeforeSave: false });
+
+  // 3) Send it to user's email
+});
+
+exports.resetPassword = (req, res, next) => {};

@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
@@ -20,7 +21,7 @@ const userSchema = new mongoose.Schema({
   role: {
     type: String,
     enum: ['user', 'guide', 'lead-guide', 'admin'],
-    default: 'user'
+    default: 'user',
   },
   password: {
     type: String,
@@ -40,6 +41,8 @@ const userSchema = new mongoose.Schema({
     },
   },
   passwordChangedAt: Date,
+  passwordResetToken: String,
+  passwordResetExpires: Date,
 });
 
 userSchema.pre('save', async function (next) {
@@ -68,12 +71,31 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   if (this.passwordChangedAt) {
     // divided by 1000 coz getTime() gives milliseconds and we needed seconds
     const changedTimestamp = this.passwordChangedAt.getTime() / 1000;
-    
+
     // if true that means password changed after token creation
-    return JWTTimestamp < changedTimestamp
+    return JWTTimestamp < changedTimestamp;
   }
   // false means not changed
   return false;
+};
+
+userSchema.methods.createPasswordResetToken = function () {
+  /* used Node's built in crypto module to generate a resetToken which is sent to user
+    because resetTokens don't require extra protection you get from bcrypt */
+  const resetToken = crypto.randomBytes(32).toString('hex');
+
+  // before changing resetToken value in DB it must be hashed with sha256 algo
+  this.passwordResetToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+
+    console.log({resetToken}, this.passwordResetToken);
+  // Changed Reset expires in 10 mins (10 * 60 * 1000)
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+
+  // send back unencrypted token back to user
+  return resetToken;
 };
 
 const User = mongoose.model('User', userSchema);
