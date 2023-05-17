@@ -58,6 +58,18 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
+userSchema.pre('save', function (next) {
+  /* Check if we didn't modify password property or if it's not a new User
+    then do NOT manipulate passwordChangedAt two lines below */
+  if (!this.isModified('password') || this.isNew) return next();
+
+  /* minus 2secs here because passwordChangedAt is created slightly after issuing JWT. 
+    This breaks our logic where we check if user changed password after JWT was issued.
+    So we force passwordChangedAt to be less than JWT by - 2000 */
+  this.passwordChangedAt = Date.now() - 2000;
+  next()
+});
+
 // This is an instance method which is available on all documents of a certain collection
 userSchema.methods.correctPassword = async function (
   inputPassword,
@@ -90,7 +102,7 @@ userSchema.methods.createPasswordResetToken = function () {
     .update(resetToken)
     .digest('hex');
 
-    console.log({resetToken}, this.passwordResetToken);
+  console.log({ resetToken }, this.passwordResetToken);
   // Changed Reset expires in 10 mins (10 * 60 * 1000)
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
 
