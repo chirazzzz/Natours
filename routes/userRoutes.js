@@ -16,6 +16,8 @@ router.patch(
   authController.updatePassword // then password update is allowed
 );
 
+router.patch('/updateMe', authController.protect, userController.updateMe);
+
 router
   .route('/')
   .get(userController.getAllUsers)
