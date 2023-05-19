@@ -43,6 +43,11 @@ const userSchema = new mongoose.Schema({
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
+  active: {
+    type: Boolean,
+    default: true,
+    select: false,
+  },
 });
 
 userSchema.pre('save', async function (next) {
@@ -67,7 +72,14 @@ userSchema.pre('save', function (next) {
     This breaks our logic where we check if user changed password after JWT was issued.
     So we force passwordChangedAt to be less than JWT by - 2000 */
   this.passwordChangedAt = Date.now() - 2000;
-  next()
+  next();
+});
+
+// /^find/ is regex which selects any query beginning with find e.g find, findById, findByIdAndUpdate etc
+userSchema.pre(/^find/, function (next) {
+  // this point to the current query
+  this.find({ active: true });
+  next();
 });
 
 // This is an instance method which is available on all documents of a certain collection
