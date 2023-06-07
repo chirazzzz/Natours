@@ -4,6 +4,7 @@ const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
+const hpp = require('hpp');
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
@@ -41,11 +42,25 @@ app.use(mongoSanitize());
 // f) Data sanitization against XSS (Cross Site Scripting) attacks
 app.use(xss());
 
-/* g) Serving static fontVariantAlternates: 
+// g) Prevent parameter pollution
+app.use(
+  hpp({
+    whitelist: [
+      'duration',
+      'ratingsQuantity',
+      'ratingsAverage',
+      'maxGroupSize',
+      'difficulty',
+      'price',
+    ],
+  })
+);
+
+/* h) Serving static fontVariantAlternates: 
   express.static() is middleware that allows static files to be served (anything in public directory) */
 app.use(express.static(`${__dirname}/public`));
 
-// h) Test middleware
+// i) Test middleware
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
   // console.log(req.headers);
