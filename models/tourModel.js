@@ -159,6 +159,16 @@ tourSchema.pre(/^find/, function (next) {
   next();
 });
 
+tourSchema.pre(/^find/, function (next) {
+  /* .populate() allows the guides reference in tourModel above to run another query to 
+  fill out the guides data (this guides data won't be saved in DB just the objectId will) */
+  this.populate({
+    path: 'guides',
+    select: '-__v -passwordChangedAt',
+  });
+  next();
+});
+
 tourSchema.post(/^find/, function (docs, next) {
   console.log(`Query took ${Date.now() - this.start} milliseconds`); // calc time taken Date.now() - this.start from pre middleware above
   next();
