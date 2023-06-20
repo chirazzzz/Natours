@@ -37,6 +37,19 @@ const reviewSchema = new mongoose.Schema(
   }
 );
 
+// QUERY MIDDLEWARE: only runs when querying DB
+
+reviewSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: 'tour',
+    select: 'name',
+  }).populate({
+    path: 'user',
+    select: 'name photo',
+  });
+  next();
+});
+
 const Review = mongoose.model('Review', reviewSchema);
 
 module.exports = Review;
