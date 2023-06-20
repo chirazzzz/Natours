@@ -19,6 +19,7 @@ const reviewSchema = new mongoose.Schema(
       type: Date,
       default: Date.now(),
     },
+    // tour and user are parent referenced by review
     tour: {
       type: mongoose.Schema.ObjectId,
       ref: 'Tour',
@@ -40,10 +41,12 @@ const reviewSchema = new mongoose.Schema(
 // QUERY MIDDLEWARE: only runs when querying DB
 
 reviewSchema.pre(/^find/, function (next) {
-  this.populate({
+  // After using virtual populate on tours to include reviews it's better to remove tour populate here
+  /* this.populate({
     path: 'tour',
     select: 'name',
-  }).populate({
+  }) */
+  this.populate({
     path: 'user',
     select: 'name photo',
   });

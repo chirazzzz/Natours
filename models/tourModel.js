@@ -126,6 +126,14 @@ tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7; // used regular func coz we need to use 'this' keyword to point to current document
 });
 
+/* Virtual populate allows us to keep a reference to child document (reviews) on parent (tour)
+  without saving reviews in an array within tour doc. We can still see the details but don't save the data */
+tourSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'tour',
+  localField: '_id',
+});
+
 // DOCUMENT MIDDLEWARE: only runs before .save() & .create()
 tourSchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true });
