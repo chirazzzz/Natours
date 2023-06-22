@@ -1,6 +1,7 @@
 const express = require('express');
 const tourController = require('./../controllers/tourController');
 const authController = require('./../controllers/authController');
+const reviewController = require('./../controllers/reviewController');
 
 /* Could destructure tourController to save functions 
 const {getAllTours, createTour, getTour, updateTour, deleteTour} = tourController */
@@ -34,6 +35,18 @@ router
     authController.protect, // protects route
     authController.restrictTo('admin', 'lead-guide'), // verifies if user has permission (either admin or lead-guide) to delete
     tourController.deleteTour
+  );
+
+// GET /tour/:tourID/reviews - get all reviews for tour
+// GET /tour/:tourID/reviews/:reviewID - get specific review for tour
+
+// POST /tour/:tourID/reviews - add review to tour
+router
+  .route('/:tourId/reviews')
+  .post(
+    authController.protect,
+    authController.restrictTo('user'),
+    reviewController.createReview
   );
 
 module.exports = router;
