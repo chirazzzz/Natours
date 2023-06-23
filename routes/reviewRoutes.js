@@ -2,19 +2,16 @@ const express = require('express');
 const reviewController = require('./../controllers/reviewController');
 const authController = require('./../controllers/authController');
 
-// create getAllReviews and createReview routes
-const router = express.Router();
+// mergeParams allows this route to gain access to tourId on tourRouter so both example routes below work
+const router = express.Router({ mergeParams: true });
 
-router
-  .route('/')
-  .get(
-    authController.protect, // protects route
-    reviewController.getAllReviews
-  )
-  .post(
-    authController.protect,
-    authController.restrictTo('user'), // only allows 'users' to create reviews
-    reviewController.createReview
-  );
+// POST /tours/:tourId/reviews
+// POST /reviews - both these routes will go through post router below
+
+router.route('/').get(reviewController.getAllReviews).post(
+  authController.protect, // protects route
+  authController.restrictTo('user'), // only allows 'users' to create reviews
+  reviewController.createReview
+);
 
 module.exports = router;
