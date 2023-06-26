@@ -21,18 +21,17 @@ exports.getAllReviews = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.createReview = catchAsync(async (req, res, next) => {
+/* Moved this code out of createReview so that func could use factory.createOne
+  this will now be called as middleware in reviewRoutes.js before createReview */
+exports.setTourUserIds = (req, res, next) => {
   // Allow nested routes to get tour and user ids if none are specified (allows devs to specify)
   if (!req.body.tour) req.body.tour = req.params.tourId;
   if (!req.body.user) req.body.user = req.user.id;
-  const newReview = await Review.create(req.body);
+  next();
+};
 
-  res.status(201).json({
-    status: 'success',
-    data: {
-      tour: newReview,
-    },
-  });
-});
+exports.createReview = factory.createOne(Review);
+
+exports.updateReview = factory.updateOne(Review);
 
 exports.deleteReview = factory.deleteOne(Review);
