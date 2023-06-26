@@ -16,6 +16,12 @@ router.patch(
   authController.updatePassword // then password update is allowed
 );
 
+router.get(
+  '/me',
+  authController.protect, // makes sure user is logged in
+  userController.getMe, // fakes req.params.id to match req.user.id
+  userController.getUser // uses this 'faked' id to get user that is logged in
+);
 router.patch('/updateMe', authController.protect, userController.updateMe);
 router.delete('/deleteMe', authController.protect, userController.deleteMe);
 
