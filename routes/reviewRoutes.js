@@ -9,8 +9,10 @@ const router = express.Router({ mergeParams: true });
 // POST /tours/:tourId/reviews
 // POST /reviews - both these routes will go through post router below
 
+// Protects all routes after this middleware
+router.use(authController.protect);
+
 router.route('/').get(reviewController.getAllReviews).post(
-  authController.protect, // protects route
   authController.restrictTo('user'), // only allows 'users' to create reviews
   reviewController.setTourUserIds,
   reviewController.createReview
@@ -19,7 +21,13 @@ router.route('/').get(reviewController.getAllReviews).post(
 router
   .route('/:id')
   .get(reviewController.getReview)
-  .patch(reviewController.updateReview)
-  .delete(reviewController.deleteReview);
+  .patch(
+    authController.restrictTo('admin', 'user'),
+    reviewController.updateReview
+  )
+  .delete(
+    authController.restrictTo('admin', 'user'),
+    reviewController.deleteReview
+  );
 
 module.exports = router;
