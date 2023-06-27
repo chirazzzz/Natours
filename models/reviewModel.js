@@ -67,17 +67,40 @@ reviewSchema.statics.calcAverageRatings = async function (tourId) {
     },
   ]);
 
-  console.log(stats);
-
-  await Tour.findByIdAndUpdate(tourId, {
-    ratingsQuantity: stats[0].numRatings,
-    ratingsAverage: stats[0].avgRating.toFixed(2),
-  });
+  // update when there are some reviews
+  if (stats.length > 0) {
+    await Tour.findByIdAndUpdate(tourId, {
+      ratingsQuantity: stats[0].numRatings,
+      ratingsAverage: stats[0].avgRating.toFixed(2),
+    });
+  } else {
+    // otherwise set default values
+    await Tour.findByIdAndUpdate(tourId, {
+      ratingsQuantity: 0,
+      ratingsAverage: 4.5,
+    });
+  }
 };
 
 reviewSchema.post('save', function () {
+  // post doesn't have access to next()
   // this points to current review
   this.constructor.calcAverageRatings(this.tour);
+});
+
+// REWATCH Calc Average Rating on Tours vid for recap - very difficult to follow!
+// findByIdAndUpdate shorthand for findOneAndUpdate
+// findByIdAndDelete - shorthand for findOneAndDelete
+
+reviewSchema.pre(/^findOneAnd/, async function (next) {
+  // looks for 'real' middleware which starts findOneAnd
+  this.r = await this.findOne();
+  next();
+});
+
+reviewSchema.post(/^findOneAnd/, async function () {
+  // const this.r = await this.findOne(); - does NOT work here, query has already executed
+  await this.r.constructor.calcAverageRatings(this.r.tour);
 });
 
 const Review = mongoose.model('Review', reviewSchema);
