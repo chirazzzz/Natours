@@ -120,6 +120,9 @@ const tourSchema = new mongoose.Schema(
   }
 );
 
+tourSchema.index({ price: 1, ratingsAverage: -1 }); // compound index with price ascending, ratingsAve descending
+tourSchema.index({ slug: 1 });
+
 // virtual property durationWeeks is created each time we use .get
 // cannot be used in query because it's not part of DB - just amending the response to client
 tourSchema.virtual('durationWeeks').get(function () {

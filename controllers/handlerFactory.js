@@ -16,6 +16,7 @@ exports.getAll = (Model) =>
       .limitFields()
       .paginate();
 
+    // const docs = await features.query.explain(); - doesn't return any results but details things like execution stats
     const docs = await features.query;
 
     // send RESPONSE
