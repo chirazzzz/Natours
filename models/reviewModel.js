@@ -38,14 +38,16 @@ const reviewSchema = new mongoose.Schema(
   }
 );
 
-// QUERY MIDDLEWARE: only runs when querying DB
+// compound index tour_1_user_1 which is unique which allows only 1 review per tour from each user
+reviewSchema.index({ tour: 1, user: 1 }, { unique: true });
 
+// QUERY MIDDLEWARE: only runs when querying DB
 reviewSchema.pre(/^find/, function (next) {
   // After using virtual populate on tours to include reviews it's better to remove tour populate here
   /* this.populate({
-    path: 'tour',
-    select: 'name',
-  }) */
+  path: 'tour',
+  select: 'name',
+}) */
   this.populate({
     path: 'user',
     select: 'name photo',
@@ -71,7 +73,7 @@ reviewSchema.statics.calcAverageRatings = async function (tourId) {
   if (stats.length > 0) {
     await Tour.findByIdAndUpdate(tourId, {
       ratingsQuantity: stats[0].numRatings,
-      ratingsAverage: stats[0].avgRating.toFixed(2),
+      ratingsAverage: stats[0].avgRating,
     });
   } else {
     // otherwise set default values
