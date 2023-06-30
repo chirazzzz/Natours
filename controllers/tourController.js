@@ -1,6 +1,7 @@
 const Tour = require('./../models/tourModel');
 const catchAsync = require('./../utils/catchAsync');
 const factory = require('./handlerFactory');
+const AppError = require('./../utils/appError');
 
 /*** imported data from json file not needed now we've hooked upto Mongo Atlas
 const tours = fs.readFileSync(
@@ -119,6 +120,38 @@ exports.getMonthlyPlan = catchAsync(async (req, res, next) => {
     status: 'success',
     data: {
       plan,
+    },
+  });
+});
+
+exports.getToursWithin = catchAsync(async (req, res, next) => {
+  const { distance, latlng, unit } = req.params;
+  const [lat, lng] = latlng.split(',');
+
+  /* MongoDB expects distance to be converted to radians - it won't work with distances in miles/kms
+    so radian conversion involves dividing distance by 3963.2 (earth's radius in miles or 6378.1 (in kms)*/
+  const radius = unit === 'mi' ? distance / 3963.2 : distance / 6378.1;
+
+  if (!lat || !lng) {
+    next(
+      new AppError(
+        'Please provide latitude and longitude in the format latitude,longitude',
+        400
+      )
+    );
+  }
+
+  console.log(distance, lat, lng, unit);
+
+  const tours = await Tour.find({
+    startLocation: { $geoWithin: { $centerSphere: [[lng, lat], radius] } },
+  });
+
+  res.status(200).json({
+    status: 'success',
+    results: tours.length,
+    data: {
+      data: tours,
     },
   });
 });

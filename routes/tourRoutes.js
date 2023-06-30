@@ -27,6 +27,7 @@ router
   .get(tourController.aliasCheapestTours, tourController.getAllTours);
 
 router.route('/tour-stats').get(tourController.getTourStats);
+
 router
   .route('/monthly-plan/:year')
   .get(
@@ -34,6 +35,12 @@ router
     authController.restrictTo('admin', 'lead-guide', 'guide'),
     tourController.getMonthlyPlan
   );
+
+router
+  .route('/tours-within/:distance/center/:latlng/unit/:unit')
+  .get(tourController.getToursWithin);
+// as query string => /tours-within?distance=79&center=-1,233&unit=km
+// in REST style => /tours-within/79/center/34.137116, -118.115006/unit/km
 
 router
   .route('/')
