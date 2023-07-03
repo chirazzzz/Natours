@@ -42,6 +42,8 @@ router
 // as query string => /tours-within?distance=79&center=-1,233&unit=km
 // in REST style => /tours-within/79/center/34.137116, -118.115006/unit/km
 
+router.route('/distances/:latlng/unit/:unit').get(tourController.getDistances);
+
 router
   .route('/')
   .get(tourController.getAllTours)

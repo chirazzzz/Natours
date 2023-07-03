@@ -106,7 +106,7 @@ exports.getMonthlyPlan = catchAsync(async (req, res, next) => {
       $addFields: { month: '$_id' },
     },
     {
-      $project: { _id: 0 },
+      $project: { _id: 0 }, // removes _id
     },
     {
       $sort: { numTourStarts: -1 }, // -1 sort is descending
@@ -141,8 +141,6 @@ exports.getToursWithin = catchAsync(async (req, res, next) => {
     );
   }
 
-  console.log(distance, lat, lng, unit);
-
   const tours = await Tour.find({
     startLocation: { $geoWithin: { $centerSphere: [[lng, lat], radius] } },
   });
@@ -152,6 +150,51 @@ exports.getToursWithin = catchAsync(async (req, res, next) => {
     results: tours.length,
     data: {
       data: tours,
+    },
+  });
+});
+
+exports.getDistances = catchAsync(async (req, res, next) => {
+  const { latlng, unit } = req.params;
+  const [lat, lng] = latlng.split(',');
+
+  const multiplier = unit === 'mi' ? 0.000621371 : 0.001; // used below to change meters into miles or kms
+
+  if (!lat || !lng) {
+    next(
+      new AppError(
+        'Please provide latitude and longitude in the format latitude,longitude',
+        400
+      )
+    );
+  }
+
+  const distances = await Tour.aggregate([
+    {
+      // geoNear always need to be first in aggregation pipeline
+      $geoNear: {
+        // geoNear requires at least 1 geoSpatial index to work (our 1 is startLocation in tourModel)
+        near: {
+          // used geoJson to specify similar to TourModel schema
+          type: 'Point',
+          coordinates: [lng * 1, lat * 1], // (* 1) converts to numbers
+        },
+        distanceField: 'distance',
+        distanceMultiplier: multiplier, // converts distance in metres to miles or kms
+      },
+    },
+    {
+      $project: {
+        distance: 1, // only keeps this two fields
+        name: 1,
+      },
+    },
+  ]);
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      data: distances,
     },
   });
 });

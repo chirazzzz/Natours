@@ -190,8 +190,11 @@ tourSchema.post(/^find/, function (docs, next) {
 
 // AGGREGATION MIDDLEWARE
 tourSchema.pre('aggregate', function (next) {
-  // to filter out secretTour we need to another $match to aggregation pipeline
-  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } }); // 'this' refers to aggregation pipeline we unshift $match to beginning of aggregate array
+  // geoNear must be first in aggregation pipeline so secretTour filter won't run on distances route
+  if (!this.pipeline()[0]['$geoNear']) {
+    // to filter out secretTour we need to another $match to aggregation pipeline
+    this.pipeline().unshift({ $match: { secretTour: { $ne: true } } }); // 'this' refers to aggregation pipeline we unshift $match to beginning of aggregate array
+  }
 
   console.log(this.pipeline());
 
