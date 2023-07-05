@@ -74,7 +74,10 @@ app.use((req, res, next) => {
 
 /**** 2) Routes - middleware for particular routes ****/
 app.get('/', (req, res) => {
-  res.status(200).render('base');
+  res.status(200).render('base', {
+    tour: 'The Forest Hiker',
+    user: 'Chirag ',
+  });
 });
 
 // Here's where we 'mount' our Routers
