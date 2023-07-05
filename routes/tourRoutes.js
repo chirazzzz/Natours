@@ -37,10 +37,10 @@ router
   );
 
 router
-  .route('/tours-within/:distance/center/:latlng/unit/:unit')
+  .route('/tours-within/:distance/centre/:latlng/unit/:unit')
   .get(tourController.getToursWithin);
-// as query string => /tours-within?distance=79&center=-1,233&unit=km
-// in REST style => /tours-within/79/center/34.137116, -118.115006/unit/km
+// as query string => /tours-within?distance=79&centre=-1,233&unit=km
+// in REST style => /tours-within/79/centre/34.137116, -118.115006/unit/km
 
 router.route('/distances/:latlng/unit/:unit').get(tourController.getDistances);
 

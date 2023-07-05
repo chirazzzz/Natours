@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
@@ -14,17 +15,24 @@ const reviewRouter = require('./routes/reviewRoutes');
 
 const app = express();
 
+app.set('view engine', 'pug'); // pug is supported through express so no installation required
+app.set('views', path.join(__dirname, 'views')); // using path.join to avoid bug where it can't find ../views coz file system is different
+
 /**** 1) Global Middleware - for all routes ****/
-// a) Set security HTTP headers
+/* a) Serving static fontVariantAlternates: 
+  express.static() is middleware that allows static files to be served (anything in public directory) */
+app.use(express.static(path.join(__dirname, 'public')));
+
+// b) Set security HTTP headers
 app.use(helmet());
 
-/* b) Development logging
+/* c) Development logging
   morgan also calls (req, res, next) callback func >>> https://github.com/expressjs/morgan/blob/master/index.js */
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-// c) Limit requests from same API
+// d) Limit requests from same API
 const limiter = rateLimit({
   max: 100, // if creating an more frequently used API this limit would need to be larger
   windowMs: 60 * 60 * 1000,
@@ -33,17 +41,17 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter);
 
-/* d) Body parser, reading data from body into req.body
+/* e) Body parser, reading data from body into req.body
   express.json() is middleware that adds data from body to request obj */
 app.use(express.json({ limit: '10kb' }));
 
-// e) Data sanitization against NoSQL query injection
+// f) Data sanitization against NoSQL query injection
 app.use(mongoSanitize());
 
-// f) Data sanitization against XSS (Cross Site Scripting) attacks
+// g) Data sanitization against XSS (Cross Site Scripting) attacks
 app.use(xss());
 
-// g) Prevent parameter pollution
+// h) Prevent parameter pollution
 app.use(
   hpp({
     whitelist: [
@@ -57,10 +65,6 @@ app.use(
   })
 );
 
-/* h) Serving static fontVariantAlternates: 
-  express.static() is middleware that allows static files to be served (anything in public directory) */
-app.use(express.static(`${__dirname}/public`));
-
 // i) Test middleware
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
@@ -69,6 +73,10 @@ app.use((req, res, next) => {
 });
 
 /**** 2) Routes - middleware for particular routes ****/
+app.get('/', (req, res) => {
+  res.status(200).render('base');
+});
+
 // Here's where we 'mount' our Routers
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
